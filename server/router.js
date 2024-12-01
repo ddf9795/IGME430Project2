@@ -1,10 +1,11 @@
 const multer = require('multer');
+const path = require('path');
 const controllers = require('./controllers');
 const mid = require('./middleware');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'assets');
+    cb(null, path.join(__dirname, '..\\assets'));
   },
   filename: (req, file, cb) => {
     cb(null, `${file.fieldname}-${Date.now()}`);

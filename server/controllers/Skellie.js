@@ -18,7 +18,7 @@ const skelliePage = async (req, res) => {
 
 const skellieListPage = async (req, res) => {
   const username = req.headers.cookie.split('=')[2];
-  return res.render('skellieList', { username });
+  return res.render('skellielist', { username });
 };
 
 const searchPage = async (req, res) => {

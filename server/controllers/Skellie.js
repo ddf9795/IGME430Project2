@@ -33,7 +33,7 @@ const makeSkellie = async (req, res) => {
   //   return res.status(400).json({ error: 'All fields are required!' });
   // }
   const obj = {
-    data: fs.readFileSync(path.join(`/uploads/${req.file.filename}`)),
+    data: fs.readFileSync(path.resolve(__dirname, `/uploads/${req.file.filename}`)),
     contentType: 'image/png',
   };
   const newImg = await Image.create(obj);

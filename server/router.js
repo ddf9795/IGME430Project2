@@ -4,7 +4,7 @@ const mid = require('./middleware');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '/assets');
+    cb(null, 'assets');
   },
   filename: (req, file, cb) => {
     cb(null, `${file.fieldname}-${Date.now()}`);

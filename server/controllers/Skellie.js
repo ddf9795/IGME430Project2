@@ -33,12 +33,12 @@ const makeSkellie = async (req, res) => {
   //   return res.status(400).json({ error: 'All fields are required!' });
   // }
   const obj = {
-    data: fs.readFileSync(path.resolve(__dirname, `/public/uploads/${req.file.filename}`)),
+    data: fs.readFileSync(path.resolve(__dirname, `..\\..\\assets\\${req.file.filename}`)),
     contentType: 'image/png',
   };
   const newImg = await Image.create(obj);
   console.log(newImg._id);
-  fs.unlinkSync(path.join(`uploads/${req.file.filename}`));
+  fs.unlinkSync(path.join(__dirname, `..\\..\\assets\\${req.file.filename}`));
 
   const skellieData = {
     name: req.body.name,

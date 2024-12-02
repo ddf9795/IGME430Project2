@@ -15,6 +15,7 @@ const handleLogin = (e) => {
   }
 
   helper.sendPost('application/json', e.target.action, { username, pass });
+  setTimeout(() => window.location.href = "/skellieList", 1000);
   return false;
 };
 
@@ -37,6 +38,7 @@ const handleSignup = (e) => {
   }
 
   helper.sendPost('application/json', e.target.action, { username, pass, pass2 });
+  setTimeout(() => window.location.href = "/skellieList", 1000);
   return false;
 };
 

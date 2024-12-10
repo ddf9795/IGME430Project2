@@ -2,7 +2,7 @@ const models = require('../models');
 
 const { Account } = models;
 
-const notFoundPage = (req, res) => res.render('notFound');
+const notFoundPage = (req, res) => res.render('notfound');
 
 const loginPage = (req, res) => res.render('login');
 

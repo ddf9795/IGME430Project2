@@ -61,7 +61,6 @@ const signup = async (req, res) => {
   }
 };
 
-// eslint-disable-next-line arrow-body-style
 const detailsPage = (req, res) => res.render('details');
 
 // This is known to not work, I was not able to fixit in time. Apologies.

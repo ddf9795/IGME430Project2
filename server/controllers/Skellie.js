@@ -7,7 +7,6 @@ const {
   Skellie, Image, Account, Comment,
 } = models;
 
-// eslint-disable-next-line arrow-body-style
 const makerPage = async (req, res) => {
   const username = req.headers.cookie.split('=')[2];
   return res.render('maker', { username });

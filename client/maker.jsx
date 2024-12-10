@@ -16,6 +16,8 @@ const handleSkellie = (e, onSkellieAdded) => {
     return false;
   }
 //   helper.sendPost(e.target.enctype, e.target.action, data, onSkellieAdded);
+
+  //We dont want to prevent default or send a post because we actually want to manually redirect with a GET request elsewhere
   return false;
 };
 

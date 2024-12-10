@@ -8,6 +8,7 @@ const loginPage = (req, res) => res.render('login');
 
 const logout = (req, res) => {
   req.session.destroy();
+  // Clear the username cookie
   res.set({ 'Set-Cookie': 'username=' });
   res.status(200).redirect('/');
 };

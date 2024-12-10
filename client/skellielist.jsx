@@ -36,6 +36,7 @@ const SkellieList = (props) => {
     useEffect(() => {
         const loadSkelliesFromServer = async () => {
             const urlParams = new URLSearchParams(window.location.search);
+            // If no name parameter was provided, make a blank one here
             if (urlParams.get('name') === null) urlParams.append('name', '');
             const response = await fetch(`/getPersonalSkellies?name=${urlParams.get('name')}`);
             const data = await response.json();

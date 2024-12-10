@@ -19,11 +19,12 @@ const requiresSecure = (req, res, next) => {
   return next();
 };
 
+// Below functionality borrowed and modified from:
+// https://www.geeksforgeeks.org/how-to-parse-http-cookie-header-and-return-an-object-of-all-cookie-name-value-pairs-in-javascript/
 const requireSameAccount = (req, res, next) => {
   const pairs = req.headers.cookie.split(';');
   const pairs2 = pairs.map((cookie) => cookie.split('='));
 
-  // Create an object with all key-value pairs
   const cookieObj = pairs2.reduce((obj, cookie) => {
     // eslint-disable-next-line no-param-reassign
     obj[decodeURIComponent(cookie[0].trim())] = decodeURIComponent(cookie[1].trim());

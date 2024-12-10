@@ -34,6 +34,8 @@ const makeSkellie = async (req, res) => {
   // if (!body.name) {
   //   return res.status(400).json({ error: 'All fields are required!' });
   // }
+
+  // Upload the image to the server, store the data to the mongo object, then delete it
   const obj = {
     data: fs.readFileSync(path.join('./server/', `${req.file.filename}`)),
     contentType: 'image/png',
@@ -60,6 +62,7 @@ const makeSkellie = async (req, res) => {
     await owner.skellies.push(newSkellie._id);
     await owner.save();
 
+    // Redirect the user to the new skellie
     return res.redirect(`/skellie?${new URLSearchParams({ id: newSkellie._id })}`);
   } catch (err) {
     console.log(err);
@@ -72,6 +75,10 @@ const makeSkellie = async (req, res) => {
 
 const getPersonalSkellies = async (req, res) => {
   try {
+    // The following search looks for:
+    // If your username is the owner of the Skellie
+    // OR is in the permittedUsers
+    // and that theres a RegEx match
     const username = req.headers.cookie.split('=')[2];
     const query1 = { owner: req.session.account._id };
     const query3 = { permittedUsers: username };
@@ -91,6 +98,11 @@ const getPersonalSkellies = async (req, res) => {
 
 const getSkellies = async (req, res) => {
   try {
+    // The following search looks for:
+    // If your username is the owner of the Skellie
+    // OR is in the permittedUsers
+    // OR the Skellie is public
+    // and that theres a RegEx match
     const username = req.headers.cookie.split('=')[2];
     const query1 = { owner: req.session.account._id };
     const query2 = { visibility: 'public' };
@@ -109,6 +121,7 @@ const getSkellies = async (req, res) => {
   }
 };
 
+// UNUSED FUNCTIONS - honestly don't know why theyre still here but oh well
 const searchPersonalSkellies = async (req, res) => {
   try {
     const username = req.headers.cookie.split('=')[2];
@@ -148,6 +161,7 @@ const searchSkellies = async (req, res) => {
 };
 
 const getSkellie = async (req, res) => {
+  // use the provided ID to find the skellie and its info
   try {
     const { id } = req.query;
     console.log(id);
@@ -224,6 +238,8 @@ const deleteSkellie = async (req, res) => {
     const query = { _id: id };
     const docs = await Skellie.findById(query);
 
+    // Find the owner of the skellie and splice the skellie entry out of their owned list
+    // This was for scrapped functionality but it works all the same, so no point in gutting it
     const owner = await Account.findById(docs.owner._id).populate('skellies');
     for (let i = 0; i < owner.skellies.length; i++) {
       const skellie = owner.skellies[i];

@@ -100,10 +100,12 @@ const Skellie = (props) => {
 
     useEffect(() => {
         const loadSkelliesFromServer = async () => {
+            //Load the skellie via the url param id
             const urlParams = new URLSearchParams(window.location.search);
             const response = await fetch(`/getSkellie?id=${urlParams.get('id')}`);
             const data = await response.json();
 
+            //Scrapped functionality for being able to comment as the skellies youve made
             const ownerSkellies = await fetch('/getPersonalSkellies?name=')
             mySkellies = await ownerSkellies.json()
 
@@ -123,6 +125,11 @@ const Skellie = (props) => {
 
     const skellieNodes = skellies.map(skellie => {
         const username = document.cookie.split('=')[1];
+
+        //We only want certain elements appearing if the username stored in cookies is the same as the owner of the skellie
+        //We have middleware to check that you are actually who you say you are, so you cant edit your cookies to lie
+
+        //Side note: I LOVE TERNARY IF STATEMENTS
 
         const deleteBio = username === skellie.owner.username ? (
             <button class='deleteBio' onMouseUp={(e) => handleBioDelete(e, props.triggerReload)}>-</button>
@@ -179,6 +186,7 @@ const Skellie = (props) => {
 
         const commentSection = skellie.comments.map(t => (
             <div className='commentContainer'>
+                {/* Image rep is scrapped, not that it was ever able to grab this placeholder image anyways */}
                 <img src='https://placehold.co/250x250' hidden/>
                 <h3 className='commentUsername'>{t.poster}</h3>
                 <p className='commentContents'>{t.content}</p>
@@ -199,6 +207,7 @@ const Skellie = (props) => {
             className='commentForm'
             enctype='application/json'
             >
+                {/* Scrapped functionality in picking a skellie or yourself as the poster */}
                 <select name='poster' id='posterSelect' hidden>
                     <option value={username}>Myself ({username})</option>
                     {skellieSelect}

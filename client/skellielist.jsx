@@ -3,18 +3,29 @@ const { useState, useEffect } = React;
 const { createRoot } = require('react-dom/client');
 const helper = require('./helper.js');
 
+const handleSearch = (e, onSearch) => {
+    e.preventDefault();
+    helper.hideError();
+
+    const name = e.target.querySelector('#skellieName').value;
+    const params = new URLSearchParams()
+    // window.location.href =
+    return false;
+  };
+
 const SkellieSearch = (props) => {
     return (
         <form id="skellieSearch"
+            // onSubmit={(e) => handleSearch(e, props.triggerReload)}
             name='skellieSearch'
-            action='/searchPersonalSkellies'
+            action='/skellieList'
             method='GET'
             className='skellieSearch'
-            enctype='application/json'
+            enctype='application/x-www-form-urlencoded'
         >
             <label htmlFor='name'>Name: </label>
             <input id='skellieName' type='text' name='name' placeholder='Skellie Name' />
-            <input className="formSubmit" type="submit" value="Search" />
+            <input className="searchSubmit" type="submit" value="Search" />
         </form>
     );
 };
@@ -24,12 +35,15 @@ const SkellieList = (props) => {
 
     useEffect(() => {
         const loadSkelliesFromServer = async () => {
-            const response = await fetch('/getPersonalSkellies');
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('name') === null) urlParams.append('name', '');
+            const response = await fetch(`/getPersonalSkellies?name=${urlParams.get('name')}`);
             const data = await response.json();
+            console.log(data);
             setSkellies(data.skellies);
         };
         loadSkelliesFromServer();
-    }, [props.reloadSkellies]);
+    }, [props.skellies]);
 
     if (skellies.length === 0) {
         return (
@@ -41,10 +55,14 @@ const SkellieList = (props) => {
 
     const skellieNodes = skellies.map(skellie => {
         return (
-            <div key={ skellie._id } className='skellie'>
-                <a href={`/skellie?id=${skellie._id}`} ><img  src={`data:${skellie.img.contentType};base64, ${Buffer.from(skellie.img.data)}`} alt='skellie face' className='skellieFace' /></a>
-                <h3 className='skellieName'>Name: {skellie.name}</h3>
-            </div>
+            <a href={`/skellie?id=${skellie._id}`} >
+                <div key={ skellie._id } className='skellie'>
+                    {/* Below image display code borrowed from: https://stackoverflow.com/questions/56769076/how-to-show-base64-image-in-react */}
+                    <img  src={`data:${skellie.img.contentType};base64, ${Buffer.from(skellie.img.data)}`} alt='skellie face' className='skellieFace' />
+                    <h3 className='skellieName'>{skellie.name}</h3>
+                    <h3 className='skellieOwner'>Created by: {skellie.owner.username}</h3>
+                </div>
+            </a>
         );
     });
 
@@ -55,12 +73,15 @@ const App = (props) => {
     const [reloadSkellies, setReloadSkellies] = useState(props.reloadSkellies);
 
     return (
-        /* <div id='search'>
-            <SkellieSearch triggerReload={() => setReloadSkellies(!reloadSkellies)} />
-        </div> */
-        <div id='skellies'>
-            <SkellieList skellies={ [] } reloadSkellies={ reloadSkellies } />
+        <div>
+            <div id='search'>
+                <SkellieSearch triggerReload={() => setReloadSkellies(!reloadSkellies)} />
+            </div>
+            <div id='skellies'>
+                <SkellieList skellies={ [] } reloadSkellies={ reloadSkellies } />
+            </div>
         </div>
+
     );
 };
 

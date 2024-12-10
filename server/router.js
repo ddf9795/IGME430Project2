@@ -14,16 +14,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const router = (app) => {
-  app.get('/getSkellies', mid.requiresLogin, controllers.Skellie.getSkellies);
-  app.get('/getPersonalSkellies', mid.requiresLogin, controllers.Skellie.getPersonalSkellies);
-  app.get('/getSkellie', mid.requiresLogin, controllers.Skellie.getSkellie);
+  app.get('/getSkellies', mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.getSkellies);
+  app.get('/getPersonalSkellies', mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.getPersonalSkellies);
+  app.get('/getSkellie', mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.getSkellie);
 
-  app.get('/searchSkellies', mid.requiresLogin, controllers.Skellie.searchSkellies);
-  app.get('/searchPersonalSkellies', mid.requiresLogin, controllers.Skellie.searchPersonalSkellies);
+  app.post('/addBio', mid.requiresSecure, mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.addBio);
+  app.post('/addWhitelistUser', mid.requiresSecure, mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.addUser);
+  app.post('/addComment', mid.requiresSecure, mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.addComment);
 
-  app.post('/addBio', mid.requiresSecure, mid.requiresLogin, controllers.Skellie.addBio);
-
-  app.post('/deleteSkellie', mid.requiresSecure, mid.requiresLogin, controllers.Skellie.deleteSkellie);
+  app.post('/deleteSkellie', mid.requiresSecure, mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.deleteSkellie);
+  app.post('/deleteBio', mid.requiresSecure, mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.deleteBio);
+  app.post('/deleteWhitelistUser', mid.requiresSecure, mid.requiresLogin, mid.requireSameAccount, controllers.Skellie.deleteUser);
 
   app.get('/login', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
   app.post('/login', mid.requiresSecure, mid.requiresLogout, controllers.Account.login);
@@ -43,6 +44,8 @@ const router = (app) => {
 
   app.get('/skellieList', mid.requiresSecure, mid.requiresLogin, controllers.Skellie.skellieListPage);
   app.get('/search', mid.requiresSecure, mid.requiresLogin, controllers.Skellie.searchPage);
+
+  app.get('*', controllers.Account.notFoundPage);
 };
 
 module.exports = router;

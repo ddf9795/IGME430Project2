@@ -3,7 +3,9 @@ const path = require('path');
 
 const models = require('../models');
 
-const { Skellie, Image } = models;
+const {
+  Skellie, Image, Account, Comment,
+} = models;
 
 // eslint-disable-next-line arrow-body-style
 const makerPage = async (req, res) => {
@@ -47,11 +49,17 @@ const makeSkellie = async (req, res) => {
     owner: req.session.account._id,
     visibility: req.body.vis,
     permittedUsers: req.body.permittedUsers,
+    comments: req.body.comments,
   };
 
   try {
     const newSkellie = new Skellie(skellieData);
     await newSkellie.save();
+
+    const owner = await Account.findById(newSkellie.owner._id);
+    await owner.skellies.push(newSkellie._id);
+    await owner.save();
+
     return res.redirect(`/skellie?${new URLSearchParams({ id: newSkellie._id })}`);
   } catch (err) {
     console.log(err);
@@ -67,8 +75,9 @@ const getPersonalSkellies = async (req, res) => {
     const username = req.headers.cookie.split('=')[2];
     const query1 = { owner: req.session.account._id };
     const query3 = { permittedUsers: username };
-    const docs = await Skellie.find().or(query1).or(query3)
-      .select('name img bio owner visibility permittedUsers')
+    const regex = new RegExp(`^$|${req.query.name}`, 'i');
+    const docs = await Skellie.find({ name: { $regex: regex } }).or(query1).or(query3)
+      .select('name img bio owner visibility permittedUsers comments')
       .populate('img')
       .populate('owner')
       .lean()
@@ -86,7 +95,8 @@ const getSkellies = async (req, res) => {
     const query1 = { owner: req.session.account._id };
     const query2 = { visibility: 'public' };
     const query3 = { permittedUsers: username };
-    const docs = await Skellie.find().or(query1).or(query2).or(query3)
+    const regex = new RegExp(`^$|${req.query.name}`, 'i');
+    const docs = await Skellie.find({ name: { $regex: regex } }).or(query2).or(query1).or(query3)
       .select('name img bio owner visibility permittedUsers')
       .populate('img')
       .populate('owner')
@@ -121,10 +131,10 @@ const searchPersonalSkellies = async (req, res) => {
 const searchSkellies = async (req, res) => {
   try {
     const username = req.headers.cookie.split('=')[2];
-    const query1 = { owner: req.body.owner, name: req.body.name };
     const query3 = { permittedUsers: username };
     const query4 = { visibility: 'public' };
-    const docs = await Skellie.find(query1).or(query3).or(query4)
+    const regex = new RegExp(req.query.name, 'i');
+    const docs = await Skellie.find({ name: { $regex: regex } }).or(query3).or(query4)
       .select('name img bio owner visibility permittedUsers')
       .populate('img')
       .populate('owner')
@@ -143,9 +153,10 @@ const getSkellie = async (req, res) => {
     console.log(id);
     const query = { _id: id };
     const docs = await Skellie.find(query)
-      .select('name img bio owner visibility permittedUsers')
+      .select('name img bio owner visibility permittedUsers comments')
       .populate('img')
       .populate('owner')
+      .populate('comments')
       .lean()
       .exec();
     return res.json({ skellies: docs });
@@ -160,12 +171,50 @@ const addBio = async (req, res) => {
     const { id, topic, desc } = req.body;
     const query = { _id: id };
     const docs = await Skellie.findById(query);
-    docs.bio.set(topic, desc);
+    await docs.bio.set(topic, desc);
     await docs.save();
-    return res.status(202);
+    return res.status(201).json({ skellies: docs });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Error adding to bio!' });
+  }
+};
+
+const addUser = async (req, res) => {
+  try {
+    const { id, user } = req.body;
+    const query = { _id: id };
+    const docs = await Skellie.findById(query);
+    await docs.permittedUsers.push(user);
+    await docs.save();
+    return res.status(201).json({ skellies: docs });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Error adding to whitelist!' });
+  }
+};
+
+const addComment = async (req, res) => {
+  try {
+    const {
+      id,
+      poster,
+      comment,
+    } = req.body;
+    console.log(req.session.account._id);
+    const query = { _id: id };
+    const docs = await Skellie.findById(query);
+    const newComment = new Comment({
+      commenter: req.session.account._id,
+      poster,
+      content: comment,
+    });
+    await docs.comments.push(newComment);
+    await docs.save();
+    return res.status(201).json({ skellies: docs });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Error posting comment!' });
   }
 };
 
@@ -173,11 +222,57 @@ const deleteSkellie = async (req, res) => {
   try {
     const { id } = req.body;
     const query = { _id: id };
+    const docs = await Skellie.findById(query);
+
+    const owner = await Account.findById(docs.owner._id).populate('skellies');
+    for (let i = 0; i < owner.skellies.length; i++) {
+      const skellie = owner.skellies[i];
+      console.log(skellie._id);
+      if (skellie._id.toString() === id) {
+        owner.skellies.splice(i, 1);
+        break;
+      }
+    }
+    await owner.save();
+
+    await Image.findByIdAndDelete(docs.img._id);
+
     await Skellie.findByIdAndDelete(query);
-    return res.redirect('/skellieList');
+
+    return res.status(200).json({ redirect: '/skellieList' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Error deleting skellie!' });
+  }
+};
+
+const deleteBio = async (req, res) => {
+  try {
+    const { id, name } = req.body;
+    const query = { _id: id };
+    const docs = await Skellie.findById(query);
+    const success = await docs.bio.delete(name);
+    console.log(success);
+    await docs.save();
+    return res.status(200).json({ skellies: docs });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Error deleting bio point!' });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id, index } = req.body;
+    const query = { _id: id };
+    const docs = await Skellie.findById(query);
+    const success = await docs.permittedUsers.splice(index, 1);
+    console.log(success);
+    await docs.save();
+    return res.status(200).json({ skellies: docs });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Error deleting from whitelist!' });
   }
 };
 
@@ -193,5 +288,9 @@ module.exports = {
   searchPersonalSkellies,
   searchSkellies,
   addBio,
+  addUser,
+  addComment,
   deleteSkellie,
+  deleteBio,
+  deleteUser,
 };

@@ -14,8 +14,8 @@ const handleLogin = (e) => {
     return false;
   }
 
-  helper.sendPost('application/json', e.target.action, { username, pass });
-  setTimeout(() => window.location.href = "/skellieList", 1000);
+  helper.sendPost('application/json', e.target.action, { username: username, pass: pass });
+  // setTimeout(() => window.location.href = "/skellieList", 1000);
   return false;
 };
 
@@ -37,8 +37,8 @@ const handleSignup = (e) => {
     return false;
   }
 
-  helper.sendPost('application/json', e.target.action, { username, pass, pass2 });
-  setTimeout(() => window.location.href = "/skellieList", 1000);
+  helper.sendPost('application/json', e.target.action, { username: username, pass: pass, pass2: pass2 });
+  // setTimeout(() => window.location.href = "/skellieList", 1000);
   return false;
 };
 
@@ -60,8 +60,8 @@ const handleChangePassword = (e) => {
       helper.handleError('Passwords do not match!');
       return false;
     }
-  
-    helper.sendPost('application/json', e.target.action, { username, currPass, pass, pass2 });
+
+    helper.sendPost('application/json', e.target.action, { username: username, currPass: currPass, pass: pass, pass2: pass2 });
     return false;
   };
 
@@ -131,7 +131,7 @@ const ChangePasswordWindow = (props) => {
 const init = () => {
     const loginButton = document.getElementById('loginButton');
     const signupButton = document.getElementById('signupButton');
-    // const detailsButton = document.getElementById('detailsButton');
+    const detailsButton = document.getElementById('detailsButton');
 
     const root = createRoot(document.getElementById('content'));
 
@@ -147,11 +147,11 @@ const init = () => {
         return false;
     });
 
-    // detailsButton.addEventListener('click', (e) => {
-    //     e.preventDefault();
-    //     root.render( <ChangePasswordWindow /> );
-    //     return false;
-    // });
+    detailsButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        root.render( <ChangePasswordWindow /> );
+        return false;
+    });
 };
 
 window.onload = init;

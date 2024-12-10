@@ -6,6 +6,7 @@
 const handleError = (message) => {
   document.getElementById('errorMessage').textContent = message;
   document.getElementById('errorContainer').classList.remove('hidden');
+  setTimeout(() => document.getElementById('errorContainer').classList.add('hidden'), 5000);
 };
 
 /* Sends post requests to the server using fetch. Will look for various
@@ -19,12 +20,12 @@ const sendPost = async (contenttype, url, data, handler) => {
     },
     body: contenttype === 'application/json' ? JSON.stringify(data) : data,
   });
-  let result = await response;
-  if (result.headers['Content-Type'] === 'application/json') { result = result.json(); }
+  let result = response;
+  if (result.headers['Content-Type'] === 'application/json' || 'application/json; charset=utf-8') { result = await result.json(); }
   document.getElementById('errorContainer').classList.add('hidden');
 
   if (result.redirect) {
-    window.location = result.redirect;
+    window.location.href = result.redirect;
   }
 
   if (result.error) {

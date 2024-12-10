@@ -34,10 +34,9 @@ const SkellieSchema = new mongoose.Schema({
     type: [String],
     required: false,
   },
-  // comments: {
-  //   type: mongoose.Schema.ObjectId,
-  //   ref: 'CommentStore',
-  // },
+  comments: {
+    type: [Object],
+  },
   createdDate: {
     type: Date,
     default: Date.now,
@@ -50,6 +49,7 @@ SkellieSchema.statics.toAPI = (doc) => ({
   bio: doc.bio,
   owner: doc.owner,
   permittedUsers: doc.permittedUsers,
+  comments: doc.comments,
 });
 
 const SkellieModel = mongoose.model('Skellie', SkellieSchema);

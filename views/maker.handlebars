@@ -2,11 +2,14 @@
 <head>
   <meta charset="utf-8"/>
   <title>SkellieCloset</title>
-  <link rel="shortcut icon" href="/assets/img/favicon.png"/>
+  <link rel="shortcut icon" href="/assets/img/wardrobe.png"/>
   <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <nav><a href="/login"><img id="logo" src="/assets/img/face.png" alt="face logo"/></a>
+  <nav><a href="/login"><img id="logo" src="/assets/img/wardrobe.png" alt="wardrobe logo"/></a>
     <div class="navlink">Hello, {{ username }}!</div>
     <div class="navlink"><a href="/maker">Create</a></div>
     <div class="navlink"><a href="/skellieList">My Skellies</a></div>
@@ -18,9 +21,16 @@
 
   </section>
 
+  <section id="adspot">
+    <img src="assets/img/adspot.png" alt="Ad Spot for Sale">
+  </section>
+
   <div id="errorContainer" class='hidden'>
     <h3><span id="errorMessage"></span></h3>
   </div>
   <script src="/assets/makerBundle.js"></script>
 </body>
+<footer>
+  <p>(c) Dean Flint, 2024, <a href="https://www.flaticon.com/free-icons/wardrobe" title="wardrobe icons">Wardrobe icon created by Zaenul Yahya - Flaticon</a></p>
+</footer>
 </html>

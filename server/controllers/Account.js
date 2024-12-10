@@ -2,12 +2,14 @@ const models = require('../models');
 
 const { Account } = models;
 
+const notFoundPage = (req, res) => res.render('notFound');
+
 const loginPage = (req, res) => res.render('login');
 
 const logout = (req, res) => {
   req.session.destroy();
   res.set({ 'Set-Cookie': 'username=' });
-  res.redirect('/');
+  res.status(200).redirect('/');
 };
 
 const login = (req, res) => {
@@ -25,7 +27,7 @@ const login = (req, res) => {
 
     req.session.account = Account.toAPI(account);
     res.set({ 'Set-Cookie': `username=${req.session.account.username}` });
-    return res.json({ redirect: '/maker' });
+    return res.status(200).json({ redirect: '/skellieList' });
   });
 };
 
@@ -47,7 +49,8 @@ const signup = async (req, res) => {
     const newAccount = new Account({ username, password: hash });
     await newAccount.save();
     req.session.account = Account.toAPI(newAccount);
-    return res.json({ redirect: '/maker' });
+    res.set({ 'Set-Cookie': `username=${req.session.account.username}` });
+    return res.status(201).json({ redirect: '/maker' });
   } catch (err) {
     console.log(err);
     if (err.code === 11000) {
@@ -61,34 +64,39 @@ const signup = async (req, res) => {
 const detailsPage = (req, res) => res.render('details');
 
 // This is known to not work, I was not able to fixit in time. Apologies.
-const changePassword = async (res, req) => {
-  const username = `${req.body.username}`;
-  const currPass = `${req.body.currPass}`;
-  const pass = `${req.body.pass}`;
-  const pass2 = `${req.body.pass2}`;
+const changePassword = async (req, res) => {
+  const {
+    username,
+    currPass,
+    pass,
+    pass2,
+  } = req.body;
 
   if (!username || !currPass || !pass || !pass2) {
     return res.status(400).json({ error: 'All fields are required!' });
   }
 
-  const auth = Account.authenticate(username, pass, (err, account) => {
+  if (pass !== pass2) {
+    return res.status(400).json({ error: 'New passwords do not match!' });
+  }
+
+  const auth = await Account.authenticate(username, currPass, (err, account) => {
     if (err || !account) {
       return res.status(401).json({ error: 'Wrong username or password!' });
     }
 
     req.session.account = Account.toAPI(account);
 
-    return username;
+    return account._id;
   });
-
-  if (pass !== pass2) {
-    return res.status(400).json({ error: 'New passwords do not match!' });
-  }
 
   try {
     const hash = await Account.generateHash(pass);
-    Account.update({ name: auth }, { password: hash }).exec();
-    return res.json({ redirect: '/maker' });
+    console.log(auth);
+    const docs = await Account.findByIdAndUpdate(auth, { password: hash });
+    await docs.save();
+    res.set({ 'Set-Cookie': `username=${req.session.account.username}` });
+    return res.status(200).json({ redirect: '/maker' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'An error occured!' });
@@ -96,6 +104,7 @@ const changePassword = async (res, req) => {
 };
 
 module.exports = {
+  notFoundPage,
   loginPage,
   login,
   logout,
